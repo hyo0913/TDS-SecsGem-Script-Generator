@@ -102,6 +102,7 @@ void MainWindow::initExample()
     spinBox->setValue(0);
 
     ui->spinBox_AlarmId->setValue(101);
+    ui->spinBox_AlarmCount->setValue(50);
 }
 
 void MainWindow::addParameter(QTableWidget *widget)
@@ -113,7 +114,7 @@ void MainWindow::addParameter(QTableWidget *widget)
 
     // default
     QSpinBox* spinVal = new QSpinBox();
-    spinVal->setRange(0x80000000, 0x7FFFFFFF);
+    spinVal->setRange(0, 0x7FFFFFFF);
     spinVal->setValue(0);
     spinVal->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     widget->setCellWidget(row, TableColumn_Def, spinVal);
@@ -128,9 +129,9 @@ void MainWindow::addParameter(QTableWidget *widget)
 
     // increase per
     QSpinBox* spinIncPer = new QSpinBox();
-    spinInc->setRange(1, 0x7FFFFFFF);
-    spinInc->setValue(1);
-    spinInc->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    spinIncPer->setRange(1, 0x7FFFFFFF);
+    spinIncPer->setValue(1);
+    spinIncPer->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     widget->setCellWidget(row, TableColumn_IncPer, spinIncPer);
 
     // base
@@ -154,14 +155,14 @@ void MainWindow::addParameter(QTableWidget *widget)
 
     // min
     QSpinBox* spinMin = new QSpinBox();
-    spinMin->setRange(0x80000000, 0x7FFFFFFF);
+    spinMin->setRange(0, 0x7FFFFFFF);
     spinMin->setValue(0);
     spinMin->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     widget->setCellWidget(row, TableColumn_Min, spinMin);
 
     // max
     QSpinBox* spinMax = new QSpinBox();
-    spinMax->setRange(0x80000000, 0x7FFFFFFF);
+    spinMax->setRange(0, 0x7FFFFFFF);
     spinMax->setValue(0);
     spinMax->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     widget->setCellWidget(row, TableColumn_Max, spinMax);
@@ -188,85 +189,74 @@ void MainWindow::delParameter(QTableWidget *widget)
 QString MainWindow::makeAlarmScript() const
 {
     QString result;
+    QString devAddr;
+    QString virAddr;
+    QString condition;
+    QString line1;
+    QString line2;
+    const QString devAddrFormat = ui->lineEditDevAddr->text();
+    const QString virAddrFormat = ui->lineEditVirAddr->text();
 
     int count = ui->spinBox_AlarmCount->value();
 
     for( int i = 0; i < count; i++ )
     {
-        QString devAddr = ui->lineEditDevAddr->text();
-        QString virAddr = ui->lineEditVirAddr->text();
+        devAddr = makeAddress(devAddrFormat, ui->tableWidgetDevParams, i);
+        virAddr = makeAddress(virAddrFormat, ui->tableWidgetVirParams, i);
 
-        for( int j = 0; j < ui->tableWidgetDevParams->rowCount(); j++ )
-        {
-            QSpinBox* itemVal = static_cast<QSpinBox*>(ui->tableWidgetDevParams->cellWidget(j, TableColumn_Def));
-            QSpinBox* itemInc = static_cast<QSpinBox*>(ui->tableWidgetDevParams->cellWidget(j, TableColumn_Inc));
-            QSpinBox* itemIncPer = static_cast<QSpinBox*>(ui->tableWidgetDevParams->cellWidget(j, TableColumn_IncPer));
-            QComboBox* itemBase = static_cast<QComboBox*>(ui->tableWidgetDevParams->cellWidget(j, TableColumn_Base));
-            QSpinBox* itemWidth = static_cast<QSpinBox*>(ui->tableWidgetDevParams->cellWidget(j, TableColumn_Width));
-            QCheckBox* itemRange = static_cast<QCheckBox*>(ui->tableWidgetDevParams->cellWidget(j, TableColumn_Range));
-            QSpinBox* itemMin = static_cast<QSpinBox*>(ui->tableWidgetDevParams->cellWidget(j, TableColumn_Min));
-            QSpinBox* itemMax = static_cast<QSpinBox*>(ui->tableWidgetDevParams->cellWidget(j, TableColumn_Max));
-
-            if( itemVal == NULL || itemInc == NULL || itemBase == NULL || itemWidth == NULL || itemRange == NULL || itemMin == NULL || itemMax == NULL ) { break; }
-
-            int val = itemVal->value();
-            int inc = itemInc->value();
-            int incPer = itemIncPer->value();
-            int base = (itemBase->currentText() == "DEC") ? 10 : 16;
-            int width = itemWidth->value();
-            bool useRange = itemRange->isChecked();
-            int min = itemMin->value();
-            int max = itemMax->value();
-
-            val += inc * (i / incPer);
-
-            if( useRange ) {
-                val = (val % max) + min;
-            }
-
-            devAddr = devAddr.arg(val, width, base, QChar('0'));
-        }
-
-        for( int j = 0; j < ui->tableWidgetVirParams->rowCount(); j++ )
-        {
-            QSpinBox* itemVal = static_cast<QSpinBox*>(ui->tableWidgetVirParams->cellWidget(j, TableColumn_Def));
-            QSpinBox* itemInc = static_cast<QSpinBox*>(ui->tableWidgetVirParams->cellWidget(j, TableColumn_Inc));
-            QSpinBox* itemIncPer = static_cast<QSpinBox*>(ui->tableWidgetVirParams->cellWidget(j, TableColumn_IncPer));
-            QComboBox* itemBase = static_cast<QComboBox*>(ui->tableWidgetVirParams->cellWidget(j, TableColumn_Base));
-            QSpinBox* itemWidth = static_cast<QSpinBox*>(ui->tableWidgetVirParams->cellWidget(j, TableColumn_Width));
-            QCheckBox* itemRange = static_cast<QCheckBox*>(ui->tableWidgetVirParams->cellWidget(j, TableColumn_Range));
-            QSpinBox* itemMin = static_cast<QSpinBox*>(ui->tableWidgetVirParams->cellWidget(j, TableColumn_Min));
-            QSpinBox* itemMax = static_cast<QSpinBox*>(ui->tableWidgetVirParams->cellWidget(j, TableColumn_Max));
-
-            if( itemVal == NULL || itemInc == NULL || itemBase == NULL || itemWidth == NULL || itemRange == NULL || itemMin == NULL || itemMax == NULL ) { break; }
-
-            int val = itemVal->value();
-            int inc = itemInc->value();
-            int incPer = itemIncPer->value();
-            int base = (itemBase->currentText() == "DEC") ? 10 : 16;
-            int width = itemWidth->value();
-            bool useRange = itemRange->isChecked();
-            int min = itemMin->value();
-            int max = itemMax->value();
-
-            val += inc * (i / incPer);
-
-            if( useRange ) {
-                val = (val % max) + min;
-            }
-
-            virAddr = virAddr.arg(val, width, base, QChar('0'));
-        }
-
-        QString condition = QString("if( %1 != %2 )").arg(devAddr).arg(virAddr);
-        QString line1 = QString("\tHsmsAlarmReport(%1, %2)").arg(ui->spinBox_AlarmId->value()).arg(devAddr);
-        QString line2 = QString("\t%1 = %2;").arg(virAddr).arg(devAddr);
+        condition = QString("if( %1 != %2 )").arg(devAddr).arg(virAddr);
+        line1 = QString("\tHsmsAlarmReport(%1, %2)").arg(ui->spinBox_AlarmId->value()).arg(devAddr);
+        line2 = QString("\t%1 = %2;").arg(virAddr).arg(devAddr);
 
         result += condition + "\r";
         result += "{\r";
         result += line1 + "\r";
         result += line2 + "\r";
         result += "}\r\r";
+    }
+
+    return result;
+}
+
+QString MainWindow::makeAddress(const QString &addrFormat, const QTableWidget *tableWidget, int sequence) const
+{
+    if( tableWidget == NULL ) { return QString(); }
+
+    QString result = addrFormat;
+
+    for( int row = 0; row < tableWidget->rowCount(); row++ )
+    {
+        QSpinBox* itemVal = static_cast<QSpinBox*>(tableWidget->cellWidget(row, TableColumn_Def));
+        QSpinBox* itemInc = static_cast<QSpinBox*>(tableWidget->cellWidget(row, TableColumn_Inc));
+        QSpinBox* itemIncPer = static_cast<QSpinBox*>(tableWidget->cellWidget(row, TableColumn_IncPer));
+        QComboBox* itemBase = static_cast<QComboBox*>(tableWidget->cellWidget(row, TableColumn_Base));
+        QSpinBox* itemWidth = static_cast<QSpinBox*>(tableWidget->cellWidget(row, TableColumn_Width));
+        QCheckBox* itemRange = static_cast<QCheckBox*>(tableWidget->cellWidget(row, TableColumn_Range));
+        QSpinBox* itemMin = static_cast<QSpinBox*>(tableWidget->cellWidget(row, TableColumn_Min));
+        QSpinBox* itemMax = static_cast<QSpinBox*>(tableWidget->cellWidget(row, TableColumn_Max));
+
+        if( itemVal == NULL || itemInc == NULL || itemBase == NULL || itemWidth == NULL || itemRange == NULL || itemMin == NULL || itemMax == NULL ) { break; }
+
+        int val = itemVal->value();
+        int inc = itemInc->value();
+        int incPer = itemIncPer->value();
+        int base = (itemBase->currentText() == "DEC") ? 10 : 16;
+        int width = itemWidth->value();
+        bool useRange = itemRange->isChecked();
+        int min = itemMin->value();
+        int max = itemMax->value()+1;
+
+        val += inc * (sequence / incPer);
+
+        if( useRange ) {
+            val = (val % max) + min;
+
+            if( val < min ) {
+                val += max;
+            }
+        }
+
+        result = result.arg(val, width, base, QChar('0'));
     }
 
     return result;
@@ -283,38 +273,8 @@ void MainWindow::onGenerateAlarm()
 
 void MainWindow::setAlarmExampleLabels()
 {
-    QString devAddr = ui->lineEditDevAddr->text();
-    QString virAddr = ui->lineEditVirAddr->text();
-
-    for( int i = 0; i < ui->tableWidgetDevParams->rowCount(); i++ )
-    {
-        QSpinBox* itemVal = static_cast<QSpinBox*>(ui->tableWidgetDevParams->cellWidget(i, TableColumn_Def));
-        QComboBox* itemBase = static_cast<QComboBox*>(ui->tableWidgetDevParams->cellWidget(i, TableColumn_Base));
-        QSpinBox* itemWidth = static_cast<QSpinBox*>(ui->tableWidgetDevParams->cellWidget(i, TableColumn_Width));
-
-        if( itemVal == NULL || itemBase == NULL || itemWidth == NULL ) { break; }
-
-        int val = itemVal->value();
-        int base = (itemBase->currentText() == "DEC") ? 10 : 16;
-        int width = itemWidth->value();
-
-        devAddr = devAddr.arg(val, width, base, QChar('0'));
-    }
-
-    for( int i = 0; i < ui->tableWidgetVirParams->rowCount(); i++ )
-    {
-        QSpinBox* itemVal = static_cast<QSpinBox*>(ui->tableWidgetVirParams->cellWidget(i, TableColumn_Def));
-        QComboBox* itemBase = static_cast<QComboBox*>(ui->tableWidgetVirParams->cellWidget(i, TableColumn_Base));
-        QSpinBox* itemWidth = static_cast<QSpinBox*>(ui->tableWidgetVirParams->cellWidget(i, TableColumn_Width));
-
-        if( itemVal == NULL || itemBase == NULL || itemWidth == NULL ) { break; }
-
-        int val = itemVal->value();
-        int base = (itemBase->currentText() == "DEC") ? 10 : 16;
-        int width = itemWidth->value();
-
-        virAddr = virAddr.arg(val, width, base, QChar('0'));
-    }
+    QString devAddr = makeAddress(ui->lineEditDevAddr->text(), ui->tableWidgetDevParams, 0);
+    QString virAddr = makeAddress(ui->lineEditVirAddr->text(), ui->tableWidgetVirParams, 0);
 
     QString condition = QString("if( %1 != %2 )").arg(devAddr).arg(virAddr);
     QString line1 = QString("\tHsmsAlarmReport(%1, %2)").arg(ui->spinBox_AlarmId->value()).arg(devAddr);

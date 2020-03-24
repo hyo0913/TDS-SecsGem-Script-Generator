@@ -38,6 +38,7 @@ private:
     void addParameter(QTableWidget *widget);
     void delParameter(QTableWidget *widget);
     QString makeAlarmScript() const;
+    QString makeAddress(const QString &addrFormat, const QTableWidget *tableWidget, int sequence) const;
 
 private slots:
     void onGenerateAlarm();
