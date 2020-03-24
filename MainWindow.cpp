@@ -235,7 +235,11 @@ QString MainWindow::makeAddress(const QString &addrFormat, const QTableWidget *t
         QSpinBox* itemMin = static_cast<QSpinBox*>(tableWidget->cellWidget(row, TableColumn_Min));
         QSpinBox* itemMax = static_cast<QSpinBox*>(tableWidget->cellWidget(row, TableColumn_Max));
 
-        if( itemVal == NULL || itemInc == NULL || itemBase == NULL || itemWidth == NULL || itemRange == NULL || itemMin == NULL || itemMax == NULL ) { break; }
+        if( itemVal == NULL || itemInc == NULL || itemIncPer == NULL || itemBase == NULL ||
+            itemWidth == NULL || itemRange == NULL || itemMin == NULL || itemMax == NULL )
+        {
+            break;
+        }
 
         int val = itemVal->value();
         int inc = itemInc->value();
