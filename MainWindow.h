@@ -33,11 +33,15 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    void initExample();
+    void initExampleAlarm();
+    void initExampleEvent();
 
     void addParameter(QTableWidget *widget);
     void delParameter(QTableWidget *widget);
+    void connectNewParamToSetExample(const QTableWidget *widget, const char *slot);
+
     QString makeAlarmScript() const;
+    QString makeEventScript() const;
     QString makeAddress(const QString &addrFormat, const QTableWidget *tableWidget, int sequence) const;
 
 private slots:
@@ -47,6 +51,13 @@ private slots:
     void onDelAlarmDevParam();
     void onAddAlarmVirParam();
     void onDelAlarmVirParam();
+
+    void onGenerateEvent();
+    void setEventExampleLabels();
+    void onAddEventDevParam();
+    void onDelEventDevParam();
+    void onAddEventVirParam();
+    void onDelEventVirParam();
 };
 
 #endif // MAINWINDOW_H
