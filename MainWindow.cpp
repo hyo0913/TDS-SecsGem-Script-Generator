@@ -45,10 +45,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->lineEditEventDevAddr, SIGNAL(editingFinished()), this, SLOT(setEventExampleLabels()));
     connect(ui->lineEditEventVirAddr, SIGNAL(editingFinished()), this, SLOT(setEventExampleLabels()));
 
-    connect(ui->toolButtonEventAddDevParam, SIGNAL(clicked()), this, SLOT(setEventExampleLabels()));
-    connect(ui->toolButtonEventDelDevParam, SIGNAL(clicked()), this, SLOT(setEventExampleLabels()));
-    connect(ui->toolButtonEventAddVirParam, SIGNAL(clicked()), this, SLOT(setEventExampleLabels()));
-    connect(ui->toolButtonEventDelVirParam, SIGNAL(clicked()), this, SLOT(setEventExampleLabels()));
+    connect(ui->toolButtonEventAddDevParam, SIGNAL(clicked()), this, SLOT(onAddEventDevParam()));
+    connect(ui->toolButtonEventDelDevParam, SIGNAL(clicked()), this, SLOT(onDelEventDevParam()));
+    connect(ui->toolButtonEventAddVirParam, SIGNAL(clicked()), this, SLOT(onAddEventVirParam()));
+    connect(ui->toolButtonEventDelVirParam, SIGNAL(clicked()), this, SLOT(onDelEventVirParam()));
 }
 
 MainWindow::~MainWindow()
