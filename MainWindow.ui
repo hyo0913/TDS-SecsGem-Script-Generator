@@ -224,7 +224,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>Device Address</string>
+                 <string>Alarm Address</string>
                 </property>
                </widget>
               </item>
@@ -392,7 +392,7 @@ Range</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>Virtual Address</string>
+                 <string>Backup Address</string>
                 </property>
                </widget>
               </item>
