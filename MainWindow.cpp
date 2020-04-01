@@ -9,6 +9,7 @@
 
 const static QString CR = "\r";
 const static QString TAB = "\t";
+const static QString ConnectionCheckLine = "if( [Comm. State] == 0 || [ON-LINE] == 0 ) { reutrn; }\r\r";
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -321,6 +322,8 @@ QString MainWindow::makeAlarmScript() const
 
     int count = ui->spinBox_AlarmCount->value();
 
+    result = ConnectionCheckLine;
+
     for( int i = 0; i < count; i++ )
     {
         devAddr = makeAddress(devAddrFormat, ui->tableWidgetAlarmDevParams, i);
@@ -354,6 +357,8 @@ QString MainWindow::makeEventScript() const
     const QString virAddrFormat = ui->lineEditEventVirAddr->text();
 
     int count = ui->spinBox_EventCount->value();
+
+    result = ConnectionCheckLine;
 
     for( int i = 0; i < count; i++ )
     {
