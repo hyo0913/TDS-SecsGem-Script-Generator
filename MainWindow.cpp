@@ -322,8 +322,6 @@ QString MainWindow::makeAlarmScript() const
 
     int count = ui->spinBox_AlarmCount->value();
 
-    result = ConnectionCheckLine;
-
     for( int i = 0; i < count; i++ )
     {
         devAddr = makeAddress(devAddrFormat, ui->tableWidgetAlarmDevParams, i);
